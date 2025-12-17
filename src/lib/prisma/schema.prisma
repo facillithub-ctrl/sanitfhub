@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// Enum para categorizar os tipos de conteúdo
+enum ContentType {
+  UPDATE      // Changelogs
+  BLOG_POST   // Artigos
+  JOB_OPENING // Vagas
+  LEGAL       // Termos/Privacidade
+  HELP_ARTICLE // Central de Ajuda
+}
+
+// Enum para status de publicação
+enum PublicationStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model ContentItem {
+  id          String            @id @default(uuid())
+  title       String
+  slug        String            @unique
+  excerpt     String?
+  body        String            @db.Text
+  coverImage  String?
+  type        ContentType
+  status      PublicationStatus @default(DRAFT)
+  
+  tags        String[]
+  authorId    String            
+  
+  publishedAt DateTime?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([type, status])
+  @@index([slug])
+  @@map("cms_content_items")
+}
